@@ -2,6 +2,14 @@ function trim(str)
     local s = str:gsub('^%s*(.-)%s*$', '%1')
     return s
 end
+function md_skip(text)
+ return text:gsub('_', '\\_')
+        :gsub('%[', '\\[')
+        :gsub('%]', '\\]')
+        :gsub('%*', '\\*')
+        :gsub('`', '\\`')
+end
+
 function stats(lang,msg)
   users_info = {}
   local msgs = {}
@@ -29,7 +37,7 @@ function stats(lang,msg)
      if num <= 10 then
       if user.word ~= "" then
       
-    text = text..URL.unescape(user.word)..'` => `*'..user.count..'*\n'
+    text = text..md_skip(URL.unescape(user.word))..'` => `*'..user.count..'*\n'
    end
    end
     num = num +1
@@ -39,7 +47,7 @@ function stats(lang,msg)
        if num <= 10 then
        if user.word ~= "" then
       
-    text = text.."*"..URL.unescape(user.word)..'*` => `*'..user.count..'*\n'
+    text = text.."*"..md_skip(URL.unescape(user.word))..'*` => `*'..user.count..'*\n'
    end
        end
      num = num +1
@@ -49,7 +57,7 @@ function stats(lang,msg)
    if num <= 10 then
       if user.word ~= "" then
       
-    text = text.."*"..URL.unescape(user.word)..'*` => `*'..user.count..'*\n'
+    text = text.."*"..md_skip(URL.unescape(user.word))..'*` => `*'..user.count..'*\n'
    end
    end
     num = num +1
@@ -60,9 +68,9 @@ function stats(lang,msg)
   return text
  -- end
 end
-function keyboardmaker()
+function keyboardmaker(id)
    local keyboard = {}
-  keyboard.inline_keyboard = {{{text = "BACK",callback_data="Back"},{text = "رجوع",callback_data="Back"},},}
+  keyboard.inline_keyboard = {{{text = "BACK",callback_data="Back"..id},{text = "رجوع",callback_data="Back"..id},},}
   return keyboard
 end
 local function run(msg,matches)
@@ -73,50 +81,46 @@ local function run(msg,matches)
  data = load_data("data.db")
  data.word = data.word or {}
  data.word[tostring(msg.chat.id)] = data.word[tostring(msg.chat.id)] or {}
- if matches[1] == "#in:Eng" then
-  if data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id] then
-  editMessageText(msg.chat.id,msg.message_id,"*TOP 10 words :-*\n"..stats("Eng",msg),JSON:encode(keyboardmaker()),true)
+ if matches[1]:match("#in:Eng%d+") then
+  if matches[1] == "#in:Eng"..msg.from.id then
+  editMessageText(msg.chat.id,msg.message_id,"*TOP 10 words :-*\n"..stats("Eng",msg),JSON:encode(keyboardmaker(msg.from.id)),true)
   answerCallbackQuery(msg.cb_id,"English words stats")
-elseif not data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id]  then
+else
   answerCallbackQuery(msg.cb_id,"send /stat please")
   end
  return
-elseif matches[1] == "#in:Arb" then
- if data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id] then
- editMessageText(msg.chat.id,msg.message_id,"أول 10 كلمات مستخدمه بكثره :-\n"..stats("Arb",msg),JSON:encode(keyboardmaker()),true)
+elseif matches[1]:match("#in:Arb%d+") then
+ if matches[1] == "#in:Arb"..msg.from.id then
+ editMessageText(msg.chat.id,msg.message_id,"أول 10 كلمات مستخدمه بكثره :-\n"..stats("Arb",msg),JSON:encode(keyboardmaker(msg.from.id)),true)
   answerCallbackQuery(msg.cb_id,"تم اختيار احصائيه العربيه")
-   elseif not data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id]  then
+   else
   answerCallbackQuery(msg.cb_id,"ارسل كلمه /stat رجاءا")
   end
  return
-elseif matches[1] == "#in:both" then
+elseif matches[1]:match("#in:both%d+") then
  print(msg.from.id,msg.message_id,msg.chat.id)
- if data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id] then
-  editMessageText(msg.chat.id,msg.message_id,"*TOP 10 words :-*\n"..stats("both",msg),JSON:encode(keyboardmaker()),true)
+ if matches[1] == "#in:both"..msg.from.id then
+  editMessageText(msg.chat.id,msg.message_id,"*TOP 10 words :-*\n"..stats("both",msg),JSON:encode(keyboardmaker(msg.from.id )),true)
    answerCallbackQuery(msg.cb_id,"both words stats")
-    elseif not data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id]  then
+    else
   answerCallbackQuery(msg.cb_id,"send /stat please")
    end
  return
-elseif matches[1] == "#in:Back" then
- if data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id] then
+elseif matches[1]:match("#in:Back%d+") then
+ if matches[1] == "#in:Back"..msg.from.id then
   local keyboard = {}
-  keyboard.inline_keyboard = {{{text = "Eng",callback_data="Eng"},{text = "Arb",callback_data="Arb"},{text = "both",callback_data = "both"}}}
+   keyboard.inline_keyboard = {{{text = "Eng",callback_data="Eng"..msg.from.id},{text = "Arb",callback_data="Arb"..msg.from.id},{text = "both",callback_data = "both"..msg.from.id}}}
  editMessageText(msg.chat.id,msg.message_id,"**choose the option that u want from me to show up the stat with.**",JSON:encode(keyboard),true)
   answerCallbackQuery(msg.cb_id,"Back- الرجوع")
-   elseif not data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id]  then
+   else 
   answerCallbackQuery(msg.cb_id,"send /stat please")
   end
  return
  end
  if matches[1] == "/stat" then
-  print(msg.from.id,msg.message_id,msg.chat.id)
-  data.protect = data.protect or {}
-  msg.message_id = tonumber(msg.message_id) + 1
-  data.protect[msg.from.id.."#"..msg.message_id.."#"..msg.chat.id] = true
   save_data("data.db",data)
   local keyboard = {}
-  keyboard.inline_keyboard = {{{text = "Eng",callback_data="Eng"},{text = "Arb",callback_data="Arb"},{text = "both",callback_data = "both"}}}
+  keyboard.inline_keyboard = {{{text = "Eng",callback_data="Eng"..msg.from.id},{text = "Arb",callback_data="Arb"..msg.from.id},{text = "both",callback_data = "both"..msg.from.id}}}
   sendMessage(msg.chat.id,"**choose the option that u want from me to show up the stat with.**",true,false,true,JSON:encode(keyboard))
   return
  end
