@@ -16,7 +16,7 @@ mimetype = (loadfile "./mimetype.lua")()
  config = dofile('config.lua')
   dofile('utilities.lua')
   dofile("method.lua")
-  dofile("./plugins/plugins.lua")
+  
 function get_receiver(msg)
   if msg.chat.type == 'private' then
     return msg.from.id
@@ -77,7 +77,6 @@ repeat bot = getMe() until bot
 	math.random()
 
 if not plug then plug = load_data("plugins.db") end
-if plug[1] == nil then plug[1] = "plugins.lua" save_data("plugins.db",plug) end
 	last_cron = last_cron or os.date('%M') -- the time of the last cron job,
 	is_started = true -- and whether or not the bot should be running.
   config = dofile('config.lua')
