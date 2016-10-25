@@ -41,9 +41,9 @@ function string:input()
 end
 
 
-function trim(str)
-    local s = str:gsub('^%s*(.-)%s*$', '%1')
-    return s
+function string:trim()
+	local s = self:gsub('^%s*(.-)%s*$', '%1')
+	return s
 end
 
 
@@ -174,7 +174,7 @@ end
 
 function sendInline(inline_id, result, disable_web_page_preview)
 
-	local url = BASE_URL .. '/answerInlineQuery?inline_query_id=' .. inline_id .. '&results=' .. result.."&switch_pm_text=made by @lua_lang&switch_pm_parameter=/p"
+	local url = BASE_URL .. '/answerInlineQuery?inline_query_id=' .. inline_id .. '&results=' .. result.."&switch_pm_text=made by @mico_iq&switch_pm_parameter=/p"
 
 	if disable_web_page_preview == true then
 		url = url .. '&disable_web_page_preview=true'
